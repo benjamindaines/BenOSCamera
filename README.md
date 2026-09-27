@@ -2,6 +2,13 @@
 
 A Free Software, friendly Camera app for BenOS.
 
+## Screenshots 📷
+
+<p>
+  <img src="fastlane/metadata/android/en-US/phoneScreenshots/screenshot.png" width="250" />
+  <img src="fastlane/metadata/android/en-US/phoneScreenshots/screenshot1.png" width="250" />
+</p>
+
 ## GitHub
 The latest releases can be found here: [releases](https://github.com/ruditimmermans/BenOSCamera/releases). You may need to enable downloading tools from unknown sources to install it.
 You can also use the tool [Obtainium](https://github.com/ImranR98/Obtainium) or others like it to automatically update to the newest release on GitHub.
