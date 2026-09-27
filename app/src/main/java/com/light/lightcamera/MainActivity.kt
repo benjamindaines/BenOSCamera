@@ -1,38 +1,39 @@
 package com.light.lightcamera
 
 import android.Manifest
+import android.app.KeyguardManager
 import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.view.*
-import android.widget.SeekBar
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
 import android.util.Log
-import android.view.OrientationEventListener
+import android.view.*
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
 import androidx.camera.video.VideoCapture
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.IntentCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
-import com.light.lightcamera.databinding.ActivityMainBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.ZoomSuggestionOptions
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.light.lightcamera.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -65,6 +66,13 @@ class MainActivity : AppCompatActivity() {
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
+        if (isCaptureIntent()) {
+            setResult(RESULT_CANCELED)
+        }
+
+        setupSecureWindowFlags()
+        adjustUiForIntent()
+
         loadSettings()
         setupOrientationListener()
 
@@ -89,7 +97,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
-        
+
         val options = BarcodeScannerOptions.Builder()
             .setZoomSuggestionOptions(ZoomSuggestionOptions.Builder { zoomRatio ->
                 if (autoZoom) {
@@ -102,12 +110,63 @@ class MainActivity : AppCompatActivity() {
             .enableAllPotentialBarcodes()
             .build()
         barcodeScanner = BarcodeScanning.getClient(options)
-        
+
         updateQrIcon()
         updateFlashIcon()
         setupZoom()
-        
+
         checkForUpdates()
+    }
+
+    private fun isPhotoCaptureIntent(): Boolean {
+        val action = intent?.action
+        return action == MediaStore.ACTION_IMAGE_CAPTURE ||
+                action == "android.media.action.IMAGE_CAPTURE_SECURE"
+    }
+
+    private fun isVideoCaptureIntent(): Boolean {
+        return intent?.action == MediaStore.ACTION_VIDEO_CAPTURE
+    }
+
+    private fun isCaptureIntent(): Boolean {
+        return isPhotoCaptureIntent() || isVideoCaptureIntent()
+    }
+
+    private fun isSecureCameraMode(): Boolean {
+        val action = intent?.action
+        val isSecureIntent = action == MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE ||
+                action == "android.media.action.IMAGE_CAPTURE_SECURE"
+        val keyguardManager = getSystemService(KEYGUARD_SERVICE) as? KeyguardManager
+        return isSecureIntent || (keyguardManager?.isKeyguardLocked == true)
+    }
+
+    private fun setupSecureWindowFlags() {
+        if (isSecureCameraMode()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                setShowWhenLocked(true)
+                setTurnScreenOn(true)
+            } else {
+                @Suppress("DEPRECATION")
+                window.addFlags(
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                )
+            }
+            viewBinding.galleryButton.visibility = View.GONE
+        }
+    }
+
+    private fun adjustUiForIntent() {
+        if (isPhotoCaptureIntent()) {
+            viewBinding.videoCaptureButton.visibility = View.GONE
+        } else if (isVideoCaptureIntent()) {
+            viewBinding.imageCaptureButton.visibility = View.GONE
+        }
+    }
+
+    private fun getExtraOutputUri(): Uri? {
+        val intent = intent ?: return null
+        return IntentCompat.getParcelableExtra(intent, MediaStore.EXTRA_OUTPUT, Uri::class.java)
     }
 
     private fun checkForUpdates() {
@@ -145,7 +204,7 @@ class MainActivity : AppCompatActivity() {
         val oldRatio = screenAspectRatio
         loadSettings()
         applyButtonColor()
-        
+
         if (oldFlash != flashMode || oldRatio != screenAspectRatio) {
             startCamera()
         }
@@ -184,7 +243,7 @@ class MainActivity : AppCompatActivity() {
                 if (rotationDegrees != currentRotationDegrees) {
                     currentRotationDegrees = rotationDegrees
                     updateUiRotation(rotationDegrees)
-                    
+
                     // Update camera target rotation
                     imageCapture?.targetRotation = rotation
                     videoCapture?.targetRotation = rotation
@@ -195,7 +254,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUiRotation(degrees: Int) {
         val rotation = (-degrees).toFloat()
-        
+
         val viewsToRotate = listOf(
             viewBinding.qrButton,
             viewBinding.switchCameraButton,
@@ -237,7 +296,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadSettings() {
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this)
-        
+
         val flashValue = sharedPrefs.getString(KEY_FLASH_MODE, "0")?.toInt() ?: 0
         flashMode = when (flashValue) {
             1 -> ImageCapture.FLASH_MODE_ON
@@ -247,13 +306,11 @@ class MainActivity : AppCompatActivity() {
 
         val ratioValue = sharedPrefs.getString(KEY_ASPECT_RATIO, "0")?.toInt() ?: 0
         screenAspectRatio = if (ratioValue == 1) AspectRatio.RATIO_16_9 else AspectRatio.RATIO_4_3
-        
+
         tapToTakePhoto = sharedPrefs.getBoolean(KEY_TAP_TO_TAKE_PHOTO, false)
         autoZoom = sharedPrefs.getBoolean(KEY_AUTO_ZOOM, true)
         storageLocation = sharedPrefs.getString(KEY_STORAGE_LOCATION, "internal") ?: "internal"
 
-        // lensFacing is still in custom sharedPrefs or default? 
-        // Let's move everything to default.
         lensFacing = sharedPrefs.getInt(KEY_LENS_FACING, CameraSelector.LENS_FACING_BACK)
     }
 
@@ -266,20 +323,19 @@ class MainActivity : AppCompatActivity() {
         viewBinding.switchCameraButton.imageTintList = colorStateList
         viewBinding.flashButton.imageTintList = colorStateList
         viewBinding.galleryButton.imageTintList = colorStateList
-        
+
         if (recording == null) {
             viewBinding.videoCaptureButton.imageTintList = colorStateList
         }
 
         viewBinding.imageCaptureButton.backgroundTintList = colorStateList
-        // Ensure the icon is visible on the FAB. If background is very light, use black icon tint.
         val contrastColor = if (isColorLight(color)) Color.BLACK else Color.WHITE
         viewBinding.imageCaptureButton.imageTintList = ColorStateList.valueOf(contrastColor)
-        
+
         viewBinding.zoomSeekBar.progressTintList = colorStateList
         viewBinding.zoomSeekBar.thumbTintList = colorStateList
-        
-        updateQrIcon() // Update QR icon with the new base color
+
+        updateQrIcon()
     }
 
     private fun isColorLight(color: Int): Boolean {
@@ -309,7 +365,6 @@ class MainActivity : AppCompatActivity() {
             val delta = event.getAxisValue(MotionEvent.AXIS_VSCROLL)
             if (delta != 0f) {
                 val currentZoomRatio = camera?.cameraInfo?.zoomState?.value?.zoomRatio ?: 1f
-                // Scroll up (positive) to zoom in, scroll down (negative) to zoom out
                 val newZoom = if (delta > 0) currentZoomRatio * 1.05f else currentZoomRatio / 1.05f
                 camera?.cameraControl?.setZoomRatio(newZoom)
                 return true
@@ -350,7 +405,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         val scaleGestureDetector = ScaleGestureDetector(this, listener)
-        
+
         val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onSingleTapUp(e: MotionEvent): Boolean {
                 if (tapToTakePhoto) {
@@ -378,7 +433,6 @@ class MainActivity : AppCompatActivity() {
             }
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 isZoomSeekBarTouching = false
-                // Ensure final value is applied
                 camera?.cameraControl?.setLinearZoom(viewBinding.zoomSeekBar.progress / 1000f)
             }
         })
@@ -405,20 +459,19 @@ class MainActivity : AppCompatActivity() {
             ImageCapture.FLASH_MODE_ON -> ImageCapture.FLASH_MODE_AUTO
             else -> ImageCapture.FLASH_MODE_OFF
         }
-        
+
         val flashValue = when (flashMode) {
             ImageCapture.FLASH_MODE_ON -> "1"
             ImageCapture.FLASH_MODE_AUTO -> "2"
             else -> "0"
         }
-        
+
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this)
         sharedPrefs.edit().putString(KEY_FLASH_MODE, flashValue).apply()
-        
+
         imageCapture?.flashMode = flashMode
         updateFlashIcon()
-        
-        // If recording video, toggle torch
+
         if (recording != null) {
             camera?.cameraControl?.enableTorch(flashMode == ImageCapture.FLASH_MODE_ON)
         }
@@ -477,6 +530,17 @@ class MainActivity : AppCompatActivity() {
             }
             .start()
 
+        val extraOutputUri = getExtraOutputUri()
+
+        if (isPhotoCaptureIntent()) {
+            if (extraOutputUri != null) {
+                takePhotoToUri(imageCapture, extraOutputUri)
+            } else {
+                takePhotoToThumbnail(imageCapture)
+            }
+            return
+        }
+
         val name = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
@@ -514,6 +578,116 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    private fun takePhotoToUri(imageCapture: ImageCapture, outputUri: Uri) {
+        try {
+            val outputStream = contentResolver.openOutputStream(outputUri)
+            if (outputStream != null) {
+                val outputOptions = ImageCapture.OutputFileOptions.Builder(outputStream).build()
+                imageCapture.takePicture(
+                    outputOptions,
+                    ContextCompat.getMainExecutor(this),
+                    object : ImageCapture.OnImageSavedCallback {
+                        override fun onError(exc: ImageCaptureException) {
+                            Log.e("MainActivity", "Photo capture failed: ${exc.message}", exc)
+                            setResult(RESULT_CANCELED)
+                            finish()
+                        }
+
+                        override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                            val resultIntent = Intent().setData(outputUri)
+                            resultIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            setResult(RESULT_OK, resultIntent)
+                            finish()
+                        }
+                    }
+                )
+            } else {
+                saveToMediaStoreAndFinish(imageCapture, outputUri)
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error opening output stream for URI: $outputUri", e)
+            saveToMediaStoreAndFinish(imageCapture, outputUri)
+        }
+    }
+
+    private fun saveToMediaStoreAndFinish(imageCapture: ImageCapture, targetUri: Uri) {
+        val name = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/BenOSCamera")
+            }
+        }
+
+        val outputOptions = ImageCapture.OutputFileOptions
+            .Builder(contentResolver, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            .build()
+
+        imageCapture.takePicture(
+            outputOptions,
+            ContextCompat.getMainExecutor(this),
+            object : ImageCapture.OnImageSavedCallback {
+                override fun onError(exc: ImageCaptureException) {
+                    Log.e("MainActivity", "Photo capture failed: ${exc.message}", exc)
+                    setResult(RESULT_CANCELED)
+                    finish()
+                }
+
+                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                    val savedUri = output.savedUri ?: targetUri
+                    val resultIntent = Intent().setData(savedUri)
+                    resultIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    setResult(RESULT_OK, resultIntent)
+                    finish()
+                }
+            }
+        )
+    }
+
+    private fun takePhotoToThumbnail(imageCapture: ImageCapture) {
+        imageCapture.takePicture(
+            ContextCompat.getMainExecutor(this),
+            object : ImageCapture.OnImageCapturedCallback() {
+                override fun onError(exc: ImageCaptureException) {
+                    Log.e("MainActivity", "Photo capture failed: ${exc.message}", exc)
+                    setResult(RESULT_CANCELED)
+                    finish()
+                }
+
+                override fun onCaptureSuccess(imageProxy: ImageProxy) {
+                    val bitmap = imageProxy.toBitmap()
+                    val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+                    imageProxy.close()
+
+                    val rotatedBitmap = if (rotationDegrees != 0) {
+                        val matrix = android.graphics.Matrix().apply { postRotate(rotationDegrees.toFloat()) }
+                        android.graphics.Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+                    } else {
+                        bitmap
+                    }
+
+                    val maxDim = 512
+                    val scaledBitmap = if (rotatedBitmap.width > maxDim || rotatedBitmap.height > maxDim) {
+                        val scale = maxDim.toFloat() / Math.max(rotatedBitmap.width, rotatedBitmap.height)
+                        android.graphics.Bitmap.createScaledBitmap(
+                            rotatedBitmap,
+                            (rotatedBitmap.width * scale).toInt(),
+                            (rotatedBitmap.height * scale).toInt(),
+                            true
+                        )
+                    } else {
+                        rotatedBitmap
+                    }
+
+                    val resultIntent = Intent().putExtra("data", scaledBitmap)
+                    setResult(RESULT_OK, resultIntent)
+                    finish()
+                }
+            }
+        )
+    }
+
     private fun captureVideo() {
         val videoCapture = this.videoCapture ?: return
 
@@ -526,28 +700,27 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        val name = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
-            put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-                put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/BenOSCamera")
+        val extraOutputUri = getExtraOutputUri()
+        var pfd: ParcelFileDescriptor? = null
+
+        val pendingRecording = if (isVideoCaptureIntent() && extraOutputUri != null) {
+            try {
+                pfd = contentResolver.openFileDescriptor(extraOutputUri, "rw")
+                if (pfd != null) {
+                    val fileDescriptorOptions = FileDescriptorOutputOptions.Builder(pfd).build()
+                    videoCapture.output.prepareRecording(this, fileDescriptorOptions)
+                } else {
+                    videoCapture.output.prepareRecording(this, createDefaultMediaStoreVideoOptions())
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Failed to open PFD for video output", e)
+                videoCapture.output.prepareRecording(this, createDefaultMediaStoreVideoOptions())
             }
-        }
-
-        val videoCollection = if (storageLocation == "sd_card") {
-            getSDCardUri(MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
         } else {
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            videoCapture.output.prepareRecording(this, createDefaultMediaStoreVideoOptions())
         }
 
-        val mediaStoreOutputOptions = MediaStoreOutputOptions
-            .Builder(contentResolver, videoCollection)
-            .setContentValues(contentValues)
-            .build()
-
-        recording = videoCapture.output
-            .prepareRecording(this, mediaStoreOutputOptions)
+        recording = pendingRecording
             .apply {
                 if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
                     withAudioEnabled()
@@ -568,26 +741,44 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     is VideoRecordEvent.Finalize -> {
-                        if (!recordEvent.hasError()) {
-                            val msg = "Video capture succeeded: ${recordEvent.outputResults.outputUri}"
-                            Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-                            Log.d("MainActivity", msg)
+                        try {
+                            pfd?.close()
+                        } catch (e: Exception) {
+                            Log.e("MainActivity", "Error closing PFD", e)
+                        }
 
-                            val savedUri = recordEvent.outputResults.outputUri
-                            val intent = Intent(Intent.ACTION_VIEW).apply {
-                                setDataAndType(savedUri, "video/mp4")
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            }
-                            try {
-                                startActivity(intent)
-                            } catch (e: Exception) {
-                                Log.e("MainActivity", "Failed to open video", e)
-                                Toast.makeText(baseContext, getString(R.string.no_app_to_open_video), Toast.LENGTH_SHORT).show()
+                        if (!recordEvent.hasError()) {
+                            val savedUri = extraOutputUri ?: recordEvent.outputResults.outputUri
+
+                            if (isVideoCaptureIntent()) {
+                                val resultIntent = Intent().setData(savedUri)
+                                resultIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                setResult(RESULT_OK, resultIntent)
+                                finish()
+                            } else {
+                                val msg = "Video capture succeeded: ${recordEvent.outputResults.outputUri}"
+                                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                                Log.d("MainActivity", msg)
+
+                                val intent = Intent(Intent.ACTION_VIEW).apply {
+                                    setDataAndType(savedUri, "video/mp4")
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                try {
+                                    startActivity(intent)
+                                } catch (e: Exception) {
+                                    Log.e("MainActivity", "Failed to open video", e)
+                                    Toast.makeText(baseContext, getString(R.string.no_app_to_open_video), Toast.LENGTH_SHORT).show()
+                                }
                             }
                         } else {
                             recording?.close()
                             recording = null
                             Log.e("MainActivity", "Video capture ends with error: ${recordEvent.error}")
+                            if (isVideoCaptureIntent()) {
+                                setResult(RESULT_CANCELED)
+                                finish()
+                            }
                         }
                         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                         camera?.cameraControl?.enableTorch(false)
@@ -604,6 +795,27 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
+    private fun createDefaultMediaStoreVideoOptions(): MediaStoreOutputOptions {
+        val name = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+            put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/BenOSCamera")
+            }
+        }
+
+        val videoCollection = if (storageLocation == "sd_card") {
+            getSDCardUri(MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+        } else {
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        }
+
+        return MediaStoreOutputOptions
+            .Builder(contentResolver, videoCollection)
+            .setContentValues(contentValues)
+            .build()
+    }
 
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
@@ -636,8 +848,6 @@ class MainActivity : AppCompatActivity() {
                 .setTargetRotation(initialRotation)
                 .build()
 
-            // Update video capture rotation if possible, but VideoCapture builder is different
-            // Actually VideoCapture.withOutput returns a VideoCapture which has setTargetRotation
             videoCapture?.targetRotation = initialRotation
 
             val imageAnalyzer = ImageAnalysis.Builder()
@@ -658,7 +868,7 @@ class MainActivity : AppCompatActivity() {
                 camera = cameraProvider.bindToLifecycle(
                     this, cameraSelector, preview, imageCapture, videoCapture, imageAnalyzer
                 )
-                
+
                 camera?.cameraInfo?.zoomState?.observe(this) { zoomState ->
                     if (!isZoomSeekBarTouching) {
                         viewBinding.zoomSeekBar.progress = (zoomState.linearZoom * 1000).toInt()
@@ -686,7 +896,6 @@ class MainActivity : AppCompatActivity() {
                     for (barcode in barcodes) {
                         val rawValue = barcode.rawValue ?: continue
 
-                        // If it's a URL, open it in the default browser
                         if (barcode.valueType == Barcode.TYPE_URL) {
                             val url = barcode.url?.url
                             if (url != null) {
@@ -733,10 +942,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun getSDCardUri(defaultUri: Uri): Uri {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return defaultUri
-        
+
         val volumes = MediaStore.getExternalVolumeNames(this)
         val sdCardVolume = volumes.find { it != MediaStore.VOLUME_EXTERNAL_PRIMARY && it != MediaStore.VOLUME_EXTERNAL }
-        
+
         return if (sdCardVolume != null) {
             if (defaultUri == MediaStore.Images.Media.EXTERNAL_CONTENT_URI) {
                 MediaStore.Images.Media.getContentUri(sdCardVolume)
