@@ -4,13 +4,36 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <group
-        android:scaleX="2.5"
-        android:scaleY="2.5"
-        android:translateX="24"
-        android:translateY="24">
-        <path
-            android:fillColor="#FFFFFF"
-            android:pathData="M12,18q-2.5,0 -4.25,-1.75T6,12q0,-2.5 1.75,-4.25T12,6q2.5,0 4.25,1.75T18,12q0,2.5 -1.75,4.25T12,18Zm0,-2q1.65,0 2.825,-1.175T16,12q0,-1.65 -1.175,-2.825T12,8q-1.65,0 -2.825,1.175T8,12q0,1.65 1.175,2.825T12,16ZM4,21q-0.825,0 -1.412,-0.587T2,19V7q0,-0.825 0.588,-1.412T4,5h3.15L8.7,3.05q0.2,-0.25 0.5,-0.4T9.825,2.5h4.35q0.325,0 0.625,0.15t0.5,0.4L16.85,5H20q0.825,0 1.413,0.588T22,7v12q0,0.825 -0.587,1.413T20,21H4Z" />
-    </group>
+    <!-- Top left shutter button -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 28,37 h 9 a 2,2 0 0 0 2,-2 v -1 a 2,2 0 0 0 -2,-2 h -9 a 2,2 0 0 0 -2,2 v 1 a 2,2 0 0 0 2,2 z" />
+
+    <!-- White Camera Body with center lens cutout -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M 28,40 H 40 L 44,31 A 3,3 0 0 1 47,29 H 61 A 3,3 0 0 1 64,31 L 68,40 H 80 A 7,7 0 0 1 87,47 V 67 A 7,7 0 0 1 80,74 H 28 A 7,7 0 0 1 21,67 V 47 A 7,7 0 0 1 28,40 Z M 54,39.5 A 17.5,17.5 0 1 0 54,74.5 A 17.5,17.5 0 1 0 54,39.5 Z" />
+
+    <!-- Outer Blue Lens Ring -->
+    <path
+        android:fillColor="#007CDA"
+        android:pathData="M 54,40 A 17,17 0 1 1 53.99,40 Z M 54,43 A 14,14 0 1 0 54.01,43 Z" />
+
+    <!-- Inner Blue Lens Fill -->
+    <path
+        android:fillColor="#007CDA"
+        android:pathData="M 54,46 A 11,11 0 1 1 53.99,46 Z" />
+
+    <!-- Lens Reflection Highlight (White Arc) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M 48,52 A 7.5,7.5 0 0 1 54,49.5" />
+
+    <!-- Red Record Indicator Dot -->
+    <path
+        android:fillColor="#E50914"
+        android:pathData="M 76,46 A 4,4 0 1 1 75.99,46 Z" />
 </vector>
