@@ -6,6 +6,7 @@ A Free Software, friendly Camera app for BenOS.
 
 <p>
   <img src="fastlane/metadata/android/en-US/phoneScreenshots/screenshot.png" width="250" />
+  <img src="fastlane/metadata/android/en-US/phoneScreenshots/screenshot1.png" width="250" />
 </p>
 
 ## GitHub
