@@ -9,7 +9,8 @@ object BenOsUtils {
 
     /**
      * Checks whether the current operating system is BenOS.
-     * Evaluates Build properties, system properties via reflection, and system features.
+     * Evaluates Build properties, FOTA system properties (ro.fota.version, ro.fota.device),
+     * and system features.
      */
     fun isBenOs(context: Context): Boolean {
         // 1. Check Standard Build Identifiers
@@ -22,25 +23,25 @@ object BenOsUtils {
         if (display.contains("BenOS", ignoreCase = true) ||
             brand.contains("BenOS", ignoreCase = true) ||
             product.contains("BenOS", ignoreCase = true) ||
-            device.contains("zinwa_q25", ignoreCase = true) ||
+            device.contains("Q25", ignoreCase = true) ||
             fingerprint.contains("BenOS", ignoreCase = true)
         ) {
             return true
         }
 
-        // 2. Check System Properties via Reflection
-        val benOsVersionProp = getSystemProperty("ro.benos.version")
-        if (benOsVersionProp.isNotBlank() && (benOsVersionProp != "unknown")) {
+        // 2. Check FOTA System Properties via Reflection (ro.fota.version, ro.fota.device)
+        val fotaVersionProp = getSystemProperty("ro.fota.version")
+        if (fotaVersionProp.isNotBlank() && (fotaVersionProp != "unknown")) {
+            return true
+        }
+
+        val fotaDeviceProp = getSystemProperty("ro.fota.device")
+        if (fotaDeviceProp.isNotBlank() && (fotaDeviceProp != "unknown")) {
             return true
         }
 
         val buildDisplayProp = getSystemProperty("ro.build.display.id")
         if (buildDisplayProp.contains("BenOS", ignoreCase = true)) {
-            return true
-        }
-
-        val productBrandProp = getSystemProperty("ro.product.brand")
-        if (productBrandProp.contains("BenOS", ignoreCase = true)) {
             return true
         }
 
