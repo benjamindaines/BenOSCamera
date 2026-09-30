@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     <uses-feature android:name="android.hardware.camera.any" />
+    <!-- Require or declare BenOS system feature for OS filtering -->
+    <uses-feature android:name="org.benos.feature" android:required="false" />
 
     <application
         android:allowBackup="true"

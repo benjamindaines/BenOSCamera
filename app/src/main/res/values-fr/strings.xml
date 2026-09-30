@@ -109,4 +109,8 @@
     <string name="about_summary">Version de l\'application et informations sur la licence</string>
     <string name="about_support_header">Support et développement</string>
     <string name="about_legal_header">Informations légales</string>
+
+    <string name="benos_only_title">Système d\'exploitation incompatible</string>
+    <string name="benos_only_message">Caméra BenOS est spécialement conçue pour BenOS et ne peut pas être exécutée sur ce système d\'exploitation ou cette ROM.</string>
+    <string name="exit_app">Quitter</string>
 </resources>
