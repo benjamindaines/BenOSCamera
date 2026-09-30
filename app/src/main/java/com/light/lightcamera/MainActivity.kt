@@ -66,11 +66,6 @@ class MainActivity : AppCompatActivity() {
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
-        if (!BenOsUtils.isBenOs(this)) {
-            showIncompatibleOsDialog()
-            return
-        }
-
         if (isCaptureIntent()) {
             setResult(RESULT_CANCELED)
         }
@@ -934,20 +929,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             imageProxy.close()
         }
-    }
-
-    private fun showIncompatibleOsDialog() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.benos_only_title)
-            .setMessage(R.string.benos_only_message)
-            .setCancelable(false)
-            .setPositiveButton(R.string.exit_app) { _, _ ->
-                finishAffinity()
-            }
-            .setOnDismissListener {
-                finishAffinity()
-            }
-            .show()
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {

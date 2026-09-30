@@ -110,8 +110,4 @@
     <string name="about_summary">App version and license information</string>
     <string name="about_support_header">Support &amp; Development</string>
     <string name="about_legal_header">Legal Information</string>
-
-    <string name="benos_only_title">Incompatible OS</string>
-    <string name="benos_only_message">BenOS Camera is specifically built for BenOS and cannot run on this operating system or ROM.</string>
-    <string name="exit_app">Exit</string>
 </resources>
