@@ -8,44 +8,53 @@ object BenOsUtils {
     private const val TAG = "BenOsUtils"
 
     /**
-     * Checks whether the current operating system is BenOS.
-     * Evaluates Build properties, FOTA system properties (ro.fota.version, ro.fota.device),
-     * and system features.
+     * Checks whether the current operating system is strictly BenOS.
+     * Explicitly blocks execution on LineageOS, standard Android / AOSP, and other custom ROMs.
      */
     fun isBenOs(context: Context): Boolean {
-        // 1. Check Standard Build Identifiers
+        // Step 1: Explicitly check and block LineageOS & CyanogenMod
+        if (isLineageOs()) {
+            Log.d(TAG, "Device rejected: LineageOS detected.")
+            return false
+        }
+
+        // Step 2: Positive validation for BenOS
+        // Check 2a: Standard Build Identifiers containing "BenOS"
         val display = Build.DISPLAY ?: ""
         val brand = Build.BRAND ?: ""
         val product = Build.PRODUCT ?: ""
-        val device = Build.DEVICE ?: ""
         val fingerprint = Build.FINGERPRINT ?: ""
 
         if (display.contains("BenOS", ignoreCase = true) ||
             brand.contains("BenOS", ignoreCase = true) ||
             product.contains("BenOS", ignoreCase = true) ||
-            device.contains("Q25", ignoreCase = true) ||
             fingerprint.contains("BenOS", ignoreCase = true)
         ) {
             return true
         }
 
-        // 2. Check FOTA System Properties via Reflection (ro.fota.version, ro.fota.device)
-        val fotaVersionProp = getSystemProperty("ro.fota.version")
-        if (fotaVersionProp.isNotBlank() && (fotaVersionProp != "unknown")) {
-            return true
-        }
-
-        val fotaDeviceProp = getSystemProperty("ro.fota.device")
-        if (fotaDeviceProp.isNotBlank() && (fotaDeviceProp != "unknown")) {
-            return true
-        }
-
+        // Check 2b: System Properties via Reflection
         val buildDisplayProp = getSystemProperty("ro.build.display.id")
         if (buildDisplayProp.contains("BenOS", ignoreCase = true)) {
             return true
         }
 
-        // 3. Check System Features
+        val benOsVersionProp = getSystemProperty("ro.benos.version")
+        if (benOsVersionProp.isNotBlank() && benOsVersionProp != "unknown") {
+            return true
+        }
+
+        val fotaVersionProp = getSystemProperty("ro.fota.version")
+        if (fotaVersionProp.contains("BenOS", ignoreCase = true)) {
+            return true
+        }
+
+        val fotaDeviceProp = getSystemProperty("ro.fota.device")
+        if (fotaDeviceProp.contains("BenOS", ignoreCase = true)) {
+            return true
+        }
+
+        // Check 2c: System Features declared by BenOS
         try {
             val pm = context.packageManager
             if (pm.hasSystemFeature("org.benos.feature") ||
@@ -57,6 +66,38 @@ object BenOsUtils {
         } catch (e: Exception) {
             Log.e(TAG, "Error checking system features", e)
         }
+
+        // Default to false for standard Android / AOSP / other ROMs
+        return false
+    }
+
+    /**
+     * Helper to detect if the device is running LineageOS or CyanogenMod.
+     */
+    private fun isLineageOs(): Boolean {
+        val display = Build.DISPLAY ?: ""
+        val fingerprint = Build.FINGERPRINT ?: ""
+        val host = Build.HOST ?: ""
+
+        if (display.contains("lineage", ignoreCase = true) ||
+            display.contains("cyanogenmod", ignoreCase = true) ||
+            fingerprint.contains("lineage", ignoreCase = true) ||
+            host.contains("lineage", ignoreCase = true)
+        ) {
+            return true
+        }
+
+        val lineageVersion = getSystemProperty("ro.lineage.version")
+        if (lineageVersion.isNotBlank()) return true
+
+        val lineageBuildVersion = getSystemProperty("ro.lineage.build.version")
+        if (lineageBuildVersion.isNotBlank()) return true
+
+        val lineageDevice = getSystemProperty("ro.lineage.device")
+        if (lineageDevice.isNotBlank()) return true
+
+        val cmVersion = getSystemProperty("ro.cm.version")
+        if (cmVersion.isNotBlank()) return true
 
         return false
     }
