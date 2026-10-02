@@ -7,15 +7,19 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
+import android.provider.Settings
 import android.util.Log
 import android.view.*
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -61,6 +65,16 @@ class MainActivity : AppCompatActivity() {
     private var orientationEventListener: OrientationEventListener? = null
     private var currentRotationDegrees = 0
 
+    private val screenRecordLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK && result.data != null) {
+            ScreenRecordService.startService(this, result.resultCode, result.data!!)
+        } else {
+            Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
@@ -87,6 +101,7 @@ class MainActivity : AppCompatActivity() {
 
         viewBinding.imageCaptureButton.setOnClickListener { takePhoto() }
         viewBinding.videoCaptureButton.setOnClickListener { captureVideo() }
+        viewBinding.screenRecordButton.setOnClickListener { onScreenRecordClicked() }
         viewBinding.qrButton.setOnClickListener { toggleQrScanner() }
         viewBinding.switchCameraButton.setOnClickListener { switchCamera() }
         viewBinding.flashButton.setOnClickListener { toggleFlashMode() }
@@ -261,6 +276,7 @@ class MainActivity : AppCompatActivity() {
             viewBinding.flashButton,
             viewBinding.galleryButton,
             viewBinding.videoCaptureButton,
+            viewBinding.screenRecordButton,
             viewBinding.settingsButton
         )
 
@@ -323,6 +339,7 @@ class MainActivity : AppCompatActivity() {
         viewBinding.switchCameraButton.imageTintList = colorStateList
         viewBinding.flashButton.imageTintList = colorStateList
         viewBinding.galleryButton.imageTintList = colorStateList
+        viewBinding.screenRecordButton.imageTintList = colorStateList
 
         if (recording == null) {
             viewBinding.videoCaptureButton.imageTintList = colorStateList
@@ -955,6 +972,68 @@ class MainActivity : AppCompatActivity() {
         } else {
             defaultUri
         }
+    }
+
+    private fun onScreenRecordClicked() {
+        checkAndRequestOverlayPermission {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+            val countdownSeconds = prefs.getString("screen_record_countdown", "0")?.toIntOrNull() ?: 0
+
+            if (countdownSeconds > 0) {
+                startCountdownAndRecord(countdownSeconds)
+            } else {
+                launchScreenCaptureIntent()
+            }
+        }
+    }
+
+    private fun checkAndRequestOverlayPermission(onGranted: () -> Unit) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val showOverlay = prefs.getBoolean("screen_record_overlay", true)
+
+        if (showOverlay && !Settings.canDrawOverlays(this)) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.overlay_permission_title)
+                .setMessage(R.string.overlay_permission_message)
+                .setPositiveButton(R.string.grant_permission) { _, _ ->
+                    val intent = Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:$packageName")
+                    )
+                    startActivity(intent)
+                }
+                .setNegativeButton(android.R.string.cancel) { _, _ ->
+                    onGranted()
+                }
+                .show()
+        } else {
+            onGranted()
+        }
+    }
+
+    private fun startCountdownAndRecord(seconds: Int) {
+        var remaining = seconds
+        val toast = Toast.makeText(this, "$remaining…", Toast.LENGTH_SHORT)
+        toast.show()
+
+        object : CountDownTimer((seconds * 1000).toLong(), 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                remaining--
+                if (remaining > 0) {
+                    toast.setText("$remaining…")
+                    toast.show()
+                }
+            }
+
+            override fun onFinish() {
+                launchScreenCaptureIntent()
+            }
+        }.start()
+    }
+
+    private fun launchScreenCaptureIntent() {
+        val mediaProjectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+        screenRecordLauncher.launch(mediaProjectionManager.createScreenCaptureIntent())
     }
 
     companion object {

@@ -85,9 +85,78 @@
     </string-array>
 
     <string name="category_camera_settings">Camera-instellingen</string>
+    <string name="category_screen_recorder">Schermrecorder-instellingen</string>
     <string name="category_appearance">Uiterlijk</string>
     <string name="category_info">Info</string>
     <string name="about_summary">App-versie en licentie-informatie</string>
     <string name="about_support_header">Ondersteuning &amp; Ontwikkeling</string>
     <string name="about_legal_header">Juridische Informatie</string>
+
+    <!-- Screen Recorder Strings -->
+    <string name="screen_record">Schermopname</string>
+    <string name="start_screen_record">Scherm opnemen</string>
+    <string name="stop_screen_record">Opname stoppen</string>
+    <string name="pause_screen_record">Opname pauzeren</string>
+    <string name="resume_screen_record">Opname hervatten</string>
+    <string name="screen_record_started">Schermopname gestart</string>
+    <string name="screen_record_stopped">Schermopname opgeslagen: %1$s</string>
+    <string name="screen_record_notification_title">Schermopname</string>
+    <string name="screen_record_notification_text">Opname bezig…</string>
+    <string name="overlay_permission_title">Machtiging voor weergave boven andere apps</string>
+    <string name="overlay_permission_message">Schermrecorder heeft toestemming nodig om bedieningselementen over andere apps weer te geven tijdens het opnemen.</string>
+    <string name="grant_permission">Machtiging verlenen</string>
+    <string name="screen_record_resolution_title">Videokwaliteit</string>
+    <string name="screen_record_resolution_summary">Kies schermopname resolutie</string>
+    <string name="screen_record_fps_title">Framesnelheid</string>
+    <string name="screen_record_fps_summary">Kies doelframesnelheid (FPS)</string>
+    <string name="screen_record_audio_title">Audiobron</string>
+    <string name="screen_record_audio_summary">Selecteer audio-invoer voor opname</string>
+    <string name="screen_record_overlay_title">Zwevende bedieningselementen</string>
+    <string name="screen_record_overlay_summary">Toon versleepbare zwevende widget over andere apps tijdens opname</string>
+    <string name="screen_record_countdown_title">Apteltimer</string>
+    <string name="screen_record_countdown_summary">Vertraging voor start van schermopname</string>
+
+    <string-array name="screen_record_resolutions">
+        <item>Eigen schermresolutie</item>
+        <item>1080p (Full HD)</item>
+        <item>720p (HD)</item>
+        <item>480p (SD)</item>
+    </string-array>
+    <string-array name="screen_record_resolution_values">
+        <item>native</item>
+        <item>1080p</item>
+        <item>720p</item>
+        <item>480p</item>
+    </string-array>
+
+    <string-array name="screen_record_fps_entries">
+        <item>60 FPS</item>
+        <item>30 FPS</item>
+    </string-array>
+    <string-array name="screen_record_fps_values">
+        <item>60</item>
+        <item>30</item>
+    </string-array>
+
+    <string-array name="screen_record_audio_entries">
+        <item>Microfoon</item>
+        <item>Interne systeem-audio</item>
+        <item>Gedempt (Geen geluid)</item>
+    </string-array>
+    <string-array name="screen_record_audio_values">
+        <item>mic</item>
+        <item>internal</item>
+        <item>muted</item>
+    </string-array>
+
+    <string-array name="screen_record_countdown_entries">
+        <item>Uit (Direct)</item>
+        <item>3 seconden</item>
+        <item>5 seconden</item>
+    </string-array>
+    <string-array name="screen_record_countdown_values">
+        <item>0</item>
+        <item>3</item>
+        <item>5</item>
+    </string-array>
 </resources>

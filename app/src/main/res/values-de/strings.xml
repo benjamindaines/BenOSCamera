@@ -104,9 +104,78 @@
     </string-array>
 
     <string name="category_camera_settings">Kamera-Einstellungen</string>
+    <string name="category_screen_recorder">Bildschirmrekorder-Einstellungen</string>
     <string name="category_appearance">Erscheinungsbild</string>
     <string name="category_info">Info</string>
     <string name="about_summary">App-Version und Lizenzinformationen</string>
     <string name="about_support_header">Support &amp; Entwicklung</string>
     <string name="about_legal_header">Rechtliche Informationen</string>
+
+    <!-- Screen Recorder Strings -->
+    <string name="screen_record">Bildschirmaufzeichnung</string>
+    <string name="start_screen_record">Bildschirm aufzeichnen</string>
+    <string name="stop_screen_record">Aufnahme stoppen</string>
+    <string name="pause_screen_record">Aufnahme pausieren</string>
+    <string name="resume_screen_record">Aufnahme fortsetzen</string>
+    <string name="screen_record_started">Bildschirmaufzeichnung gestartet</string>
+    <string name="screen_record_stopped">Bildschirmaufzeichnung gespeichert: %1$s</string>
+    <string name="screen_record_notification_title">Bildschirmaufzeichnung</string>
+    <string name="screen_record_notification_text">Aufnahme läuft…</string>
+    <string name="overlay_permission_title">Berechtigung über anderen Apps einblenden</string>
+    <string name="overlay_permission_message">Der Bildschirmrekorder benötigt die Berechtigung, während der Aufnahme Steuerelemente über anderen Apps anzuzeigen.</string>
+    <string name="grant_permission">Berechtigung erteilen</string>
+    <string name="screen_record_resolution_title">Videoqualität</string>
+    <string name="screen_record_resolution_summary">Auflösung der Bildschirmaufzeichnung wählen</string>
+    <string name="screen_record_fps_title">Bildrate</string>
+    <string name="screen_record_fps_summary">Ziel-Bildrate (FPS) wählen</string>
+    <string name="screen_record_audio_title">Audioquelle</string>
+    <string name="screen_record_audio_summary">Audioeingang für die Aufnahme auswählen</string>
+    <string name="screen_record_overlay_title">Schwebende Steuerelemente</string>
+    <string name="screen_record_overlay_summary">Verschiebbares Widget über anderen Apps während der Aufnahme anzeigen</string>
+    <string name="screen_record_countdown_title">Countdown-Timer</string>
+    <string name="screen_record_countdown_summary">Verzögerung vor dem Start der Bildschirmaufzeichnung</string>
+
+    <string-array name="screen_record_resolutions">
+        <item>Eigene Bildschirmauflösung</item>
+        <item>1080p (Full HD)</item>
+        <item>720p (HD)</item>
+        <item>480p (SD)</item>
+    </string-array>
+    <string-array name="screen_record_resolution_values">
+        <item>native</item>
+        <item>1080p</item>
+        <item>720p</item>
+        <item>480p</item>
+    </string-array>
+
+    <string-array name="screen_record_fps_entries">
+        <item>60 FPS</item>
+        <item>30 FPS</item>
+    </string-array>
+    <string-array name="screen_record_fps_values">
+        <item>60</item>
+        <item>30</item>
+    </string-array>
+
+    <string-array name="screen_record_audio_entries">
+        <item>Mikrofon</item>
+        <item>Interne System-Audio</item>
+        <item>Stummgeschaltet (Kein Ton)</item>
+    </string-array>
+    <string-array name="screen_record_audio_values">
+        <item>mic</item>
+        <item>internal</item>
+        <item>muted</item>
+    </string-array>
+
+    <string-array name="screen_record_countdown_entries">
+        <item>Aus (Sofort)</item>
+        <item>3 Sekunden</item>
+        <item>5 Sekunden</item>
+    </string-array>
+    <string-array name="screen_record_countdown_values">
+        <item>0</item>
+        <item>3</item>
+        <item>5</item>
+    </string-array>
 </resources>

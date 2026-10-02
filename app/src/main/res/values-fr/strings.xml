@@ -104,9 +104,78 @@
     </string-array>
 
     <string name="category_camera_settings">Paramètres de la caméra</string>
+    <string name="category_screen_recorder">Paramètres de l\'enregistreur d\'écran</string>
     <string name="category_appearance">Apparence</string>
     <string name="category_info">Infos</string>
     <string name="about_summary">Version de l\'application et informations sur la licence</string>
     <string name="about_support_header">Support et développement</string>
     <string name="about_legal_header">Informations légales</string>
+
+    <!-- Screen Recorder Strings -->
+    <string name="screen_record">Enregistrement d\'écran</string>
+    <string name="start_screen_record">Enregistrer l\'écran</string>
+    <string name="stop_screen_record">Arrêter l\'enregistrement</string>
+    <string name="pause_screen_record">Mettre en pause</string>
+    <string name="resume_screen_record">Reprendre l\'enregistrement</string>
+    <string name="screen_record_started">Enregistrement d\'écran démarré</string>
+    <string name="screen_record_stopped">Enregistrement d\'écran enregistré : %1$s</string>
+    <string name="screen_record_notification_title">Enregistrement d\'écran</string>
+    <string name="screen_record_notification_text">Enregistrement en cours…</string>
+    <string name="overlay_permission_title">Autorisation de superposition</string>
+    <string name="overlay_permission_message">L\'enregistreur d\'écran a besoin de l\'autorisation pour afficher les commandes sur d\'autres applications.</string>
+    <string name="grant_permission">Accorder l\'autorisation</string>
+    <string name="screen_record_resolution_title">Qualité vidéo</string>
+    <string name="screen_record_resolution_summary">Choisir la résolution d\'enregistrement</string>
+    <string name="screen_record_fps_title">Fréquence d\'images</string>
+    <string name="screen_record_fps_summary">Choisir le taux de rafraîchissement (FPS)</string>
+    <string name="screen_record_audio_title">Source audio</string>
+    <string name="screen_record_audio_summary">Sélectionner l\'entrée audio pour l\'enregistrement</string>
+    <string name="screen_record_overlay_title">Commandes flottantes</string>
+    <string name="screen_record_overlay_summary">Afficher un widget flottant déplaçable au-dessus des autres applications</string>
+    <string name="screen_record_countdown_title">Compte à rebours</string>
+    <string name="screen_record_countdown_summary">Délai avant le début de l\'enregistrement d\'écran</string>
+
+    <string-array name="screen_record_resolutions">
+        <item>Résolution d\'écran native</item>
+        <item>1080p (Full HD)</item>
+        <item>720p (HD)</item>
+        <item>480p (SD)</item>
+    </string-array>
+    <string-array name="screen_record_resolution_values">
+        <item>native</item>
+        <item>1080p</item>
+        <item>720p</item>
+        <item>480p</item>
+    </string-array>
+
+    <string-array name="screen_record_fps_entries">
+        <item>60 FPS</item>
+        <item>30 FPS</item>
+    </string-array>
+    <string-array name="screen_record_fps_values">
+        <item>60</item>
+        <item>30</item>
+    </string-array>
+
+    <string-array name="screen_record_audio_entries">
+        <item>Microphone</item>
+        <item>Audio système interne</item>
+        <item>Muet (Pas d\'audio)</item>
+    </string-array>
+    <string-array name="screen_record_audio_values">
+        <item>mic</item>
+        <item>internal</item>
+        <item>muted</item>
+    </string-array>
+
+    <string-array name="screen_record_countdown_entries">
+        <item>Désactivé (Instant)</item>
+        <item>3 secondes</item>
+        <item>5 secondes</item>
+    </string-array>
+    <string-array name="screen_record_countdown_values">
+        <item>0</item>
+        <item>3</item>
+        <item>5</item>
+    </string-array>
 </resources>

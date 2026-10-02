@@ -105,9 +105,78 @@
     </string-array>
 
     <string name="category_camera_settings">Camera Settings</string>
+    <string name="category_screen_recorder">Screen Recorder Settings</string>
     <string name="category_appearance">Appearance</string>
     <string name="category_info">Info</string>
     <string name="about_summary">App version and license information</string>
     <string name="about_support_header">Support &amp; Development</string>
     <string name="about_legal_header">Legal Information</string>
+
+    <!-- Screen Recorder Strings -->
+    <string name="screen_record">Screen Record</string>
+    <string name="start_screen_record">Record Screen</string>
+    <string name="stop_screen_record">Stop Recording</string>
+    <string name="pause_screen_record">Pause Recording</string>
+    <string name="resume_screen_record">Resume Recording</string>
+    <string name="screen_record_started">Screen recording started</string>
+    <string name="screen_record_stopped">Screen recording saved: %1$s</string>
+    <string name="screen_record_notification_title">Screen Recording</string>
+    <string name="screen_record_notification_text">Recording in progress…</string>
+    <string name="overlay_permission_title">Display Over Other Apps Permission</string>
+    <string name="overlay_permission_message">Screen recorder needs permission to display controls on top of other apps while recording.</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="screen_record_resolution_title">Video Quality</string>
+    <string name="screen_record_resolution_summary">Choose screen recording resolution</string>
+    <string name="screen_record_fps_title">Frame Rate</string>
+    <string name="screen_record_fps_summary">Choose target frame rate (FPS)</string>
+    <string name="screen_record_audio_title">Audio Source</string>
+    <string name="screen_record_audio_summary">Select audio input for recording</string>
+    <string name="screen_record_overlay_title">Floating Controls Overlay</string>
+    <string name="screen_record_overlay_summary">Show draggable floating widget over other apps during recording</string>
+    <string name="screen_record_countdown_title">Countdown Timer</string>
+    <string name="screen_record_countdown_summary">Delay before starting screen recording</string>
+
+    <string-array name="screen_record_resolutions">
+        <item>Native Screen Resolution</item>
+        <item>1080p (Full HD)</item>
+        <item>720p (HD)</item>
+        <item>480p (SD)</item>
+    </string-array>
+    <string-array name="screen_record_resolution_values">
+        <item>native</item>
+        <item>1080p</item>
+        <item>720p</item>
+        <item>480p</item>
+    </string-array>
+
+    <string-array name="screen_record_fps_entries">
+        <item>60 FPS</item>
+        <item>30 FPS</item>
+    </string-array>
+    <string-array name="screen_record_fps_values">
+        <item>60</item>
+        <item>30</item>
+    </string-array>
+
+    <string-array name="screen_record_audio_entries">
+        <item>Microphone</item>
+        <item>Internal System Audio</item>
+        <item>Muted (No Audio)</item>
+    </string-array>
+    <string-array name="screen_record_audio_values">
+        <item>mic</item>
+        <item>internal</item>
+        <item>muted</item>
+    </string-array>
+
+    <string-array name="screen_record_countdown_entries">
+        <item>Off (Instant)</item>
+        <item>3 Seconds</item>
+        <item>5 Seconds</item>
+    </string-array>
+    <string-array name="screen_record_countdown_values">
+        <item>0</item>
+        <item>3</item>
+        <item>5</item>
+    </string-array>
 </resources>

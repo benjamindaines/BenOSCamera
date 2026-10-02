@@ -38,6 +38,50 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/category_screen_recorder">
+
+        <ListPreference
+            app:defaultValue="native"
+            app:entries="@array/screen_record_resolutions"
+            app:entryValues="@array/screen_record_resolution_values"
+            app:icon="@drawable/ic_videocam"
+            app:key="screen_record_resolution"
+            app:title="@string/screen_record_resolution_title"
+            app:summary="@string/screen_record_resolution_summary"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="60"
+            app:entries="@array/screen_record_fps_entries"
+            app:entryValues="@array/screen_record_fps_values"
+            app:icon="@drawable/ic_videocam"
+            app:key="screen_record_fps"
+            app:title="@string/screen_record_fps_title"
+            app:summary="@string/screen_record_fps_summary"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="mic"
+            app:entries="@array/screen_record_audio_entries"
+            app:entryValues="@array/screen_record_audio_values"
+            app:icon="@drawable/ic_info_outline"
+            app:key="screen_record_audio"
+            app:title="@string/screen_record_audio_title"
+            app:summary="@string/screen_record_audio_summary"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="0"
+            app:entries="@array/screen_record_countdown_entries"
+            app:entryValues="@array/screen_record_countdown_values"
+            app:icon="@drawable/ic_camera_alt"
+            app:key="screen_record_countdown"
+            app:title="@string/screen_record_countdown_title"
+            app:summary="@string/screen_record_countdown_summary"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/category_appearance">
 
         <Preference
